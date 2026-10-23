@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloud Pace: unofficial AZ-900 study planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--ink:#16222e;--mute:#5b6874;--line:#dde2e6;--a:#0b6e7a;--a2:#e8f3f4;--ok:#23794a;--okb:#e3f3ea;--bad:#b3392b;--badb:#fbe9e6;--warn:#8a5a00;--warnb:#fdf1d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f161c;--card:#18222b;--ink:#e8edf1;--mute:#9aa7b2;--line:#2b3946;--a:#4fc1cf;--a2:#16323a;--ok:#6fd49a;--okb:#16332474;--bad:#ff8f80;--badb:#3a1f1c;--warn:#f0c14e;--warnb:#3a2f12}}
+:root[data-theme="dark"]{--bg:#0f161c;--card:#18222b;--ink:#e8edf1;--mute:#9aa7b2;--line:#2b3946;--a:#4fc1cf;--a2:#16323a;--ok:#6fd49a;--okb:#163324;--bad:#ff8f80;--badb:#3a1f1c;--warn:#f0c14e;--warnb:#3a2f12}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Figtree,system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.9rem;line-height:1.15;margin:0 0 4px;font-weight:800}
+h2{font-size:1.25rem;margin:0 0 10px}
+p{margin:0 0 10px}.mute{color:var(--mute)}
+.badge{display:inline-block;background:var(--warnb);color:var(--warn);font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:99px;margin-bottom:10px}
+nav{display:flex;gap:6px;margin:16px 0;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 12px;font:600 .95rem Figtree,sans-serif;color:var(--mute);cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--a);border-color:var(--a)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px}
+label{font-weight:600;display:block;margin-bottom:6px}
+input[type=date]{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:9px 12px;font:600 .92rem Figtree,sans-serif;cursor:pointer}
+.chip.on{border-color:var(--a);background:var(--a2);color:var(--a)}
+.btn{background:var(--a);color:#fff;border:0;border-radius:8px;padding:11px 18px;font:600 1rem Figtree,sans-serif;cursor:pointer}
+:root[data-theme="dark"] .btn{color:#06222a}
+.btn.ghost{background:none;color:var(--a);border:1.5px solid var(--a)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.week{border-left:4px solid var(--a);padding-left:14px;margin:0 0 16px}
+.sess{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+.tag{font-size:.78rem;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--a2);color:var(--a)}
+.tag.weak{background:var(--warnb);color:var(--warn)}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:11px 13px;margin-bottom:8px;font:inherit;cursor:pointer}
+.opt.right{border-color:var(--ok);background:var(--okb)}.opt.wrong{border-color:var(--bad);background:var(--badb)}
+.fb{padding:12px;border-radius:8px;margin:10px 0;background:var(--a2)}
+.bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden;margin:6px 0 4px}.bar i{display:block;height:100%;background:var(--a)}.bar i.low{background:var(--warn)}
+.big{font-size:3rem;font-weight:800;line-height:1}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+footer{font-size:.82rem;color:var(--mute);margin-top:28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="badge">Unofficial study tool. Not affiliated with or endorsed by Microsoft.</span>
+<h1>Cloud Pace</h1>
+<p class="mute">Short on time before your exam? Enter your exam date and weak spots. Cloud Pace builds a revision plan for AZ-900 and adapts it as your practice scores come in.</p>
+<nav id="nav" role="tablist"></nav>
+<main id="view"></main>
+<footer>Practice questions are original and written for learning. They are not real exam questions. Always check Microsoft Learn for the official skills outline.</footer>
+</div>
+<script>
+var DOMS={cloud:"Cloud concepts",arch:"Azure architecture and services",gov:"Management and governance"};
+var Q=[
+{d:"cloud",q:"A company stops buying servers and instead pays a monthly bill for what it uses. Which expense model is this?",o:["Capital expenditure (CapEx)","Operational expenditure (OpEx)","Fixed-cost licensing","Depreciation"],a:1,e:"Cloud is pay-as-you-go, so costs are operational (OpEx) rather than a large upfront hardware purchase (CapEx)."},
+{d:"cloud",q:"A shop adds more virtual machines during a holiday sale to handle extra visitors. What is this called?",o:["Scaling up","Scaling out","Geo-replication","Disaster recovery"],a:1,e:"Scaling out (horizontal scaling) adds more instances. Scaling up makes one machine bigger."},
+{d:"cloud",q:"You only deploy your application code. The provider manages the servers, operating system and runtime. Which service model is this?",o:["IaaS","PaaS","SaaS","On-premises"],a:1,e:"PaaS hides the infrastructure and platform so you focus on code. In SaaS you just use finished software; in IaaS you manage the OS."},
+{d:"cloud",q:"In an IaaS virtual machine, who is responsible for patching the guest operating system?",o:["The cloud provider","The customer","Both equally","Nobody, it patches itself"],a:1,e:"Under the shared responsibility model, the customer manages the OS in IaaS. The provider handles the physical datacenter and hosts."},
+{d:"cloud",q:"Which statement best describes elasticity?",o:["Resources automatically grow and shrink with demand","Services stay online if one datacenter fails","Data is copied to another country","Costs never change"],a:0,e:"Elasticity is matching resources to demand automatically. Staying online during failures is high availability."},
+{d:"arch",q:"What is the logical container used to group and manage related Azure resources together?",o:["Subscription key","Resource group","Availability set","Storage tier"],a:1,e:"A resource group holds related resources so you can deploy, manage and delete them as a unit."},
+{d:"arch",q:"What is an availability zone?",o:["A discount region","A physically separate datacenter location within one region","A type of storage account","A billing boundary"],a:1,e:"Zones are separate datacenters inside a region, each with independent power, cooling and networking, which protects against a single datacenter failure."},
+{d:"arch",q:"You need to store thousands of photos and videos cheaply. Which storage fits best?",o:["Blob storage","Queue storage","A virtual network","Managed disks only"],a:0,e:"Blob storage is built for large amounts of unstructured data such as images, video and backups."},
+{d:"arch",q:"Which service runs small pieces of code in response to events, without you managing servers?",o:["Azure Functions","Azure Virtual Machines","Azure Bastion","Azure Backup"],a:0,e:"Azure Functions is serverless and event-driven: you supply the code and pay mainly when it runs."},
+{d:"arch",q:"Which resource lets your Azure virtual machines communicate privately with each other?",o:["Virtual network (VNet)","Resource lock","Policy initiative","Cost alert"],a:0,e:"A VNet is your private network in Azure, and the building block for connecting resources securely."},
+{d:"gov",q:"A team wants to allow deployments only in approved regions. Which service enforces this rule?",o:["Azure Policy","Azure Advisor","Service Health","Azure Monitor"],a:0,e:"Azure Policy defines and enforces rules on resources, such as allowed regions, and reports non-compliance."},
+{d:"gov",q:"Which feature stops someone from accidentally deleting an important resource, even if they have permission?",o:["Resource lock","Tag","Budget","Region pair"],a:0,e:"A CanNotDelete lock blocks deletion until the lock is removed. A tag only labels a resource."},
+{d:"gov",q:"Before deploying, you want to estimate the monthly cost of a set of Azure services. Which tool helps?",o:["Pricing calculator","Azure Policy","Resource Manager template","Azure Arc"],a:0,e:"The Pricing calculator estimates costs for planned resources. Cost Management tracks what you have actually spent."},
+{d:"gov",q:"What does role-based access control (RBAC) do?",o:["Controls which actions a user can perform on which resources","Encrypts all network traffic","Chooses the cheapest region","Monitors application speed"],a:0,e:"RBAC assigns roles at a scope so people get only the access they need (least privilege)."},
+{d:"gov",q:"Which service collects and analyzes metrics and logs to show how your resources are performing?",o:["Azure Monitor","Azure Blueprints","Pricing calculator","Azure Lighthouse"],a:0,e:"Azure Monitor gathers telemetry from resources and applications so you can view, alert on and respond to it."}
+];
+var S={exam:"",weak:[],stats:{cloud:{c:0,t:0},arch:{c:0,t:0},gov:{c:0,t:0}}};
+try{var raw=localStorage.getItem("cloudpace");if(raw)S=JSON.parse(raw)}catch(e){}
+function save(){try{localStorage.setItem("cloudpace",JSON.stringify(S))}catch(e){}}
+var tab="setup",quiz=null;
+var TABS=[["setup","1. Setup"],["plan","2. Your plan"],["quiz","3. Practice check"],["dash","4. Progress"]];
+function go(t){tab=t;render()}
+function daysLeft(){if(!S.exam)return 0;var d=Math.ceil((new Date(S.exam+"T00:00:00")-new Date().setHours(0,0,0,0))/864e5);return d}
+function pct(k){var s=S.stats[k];return s.t?Math.round(s.c/s.t*100):null}
+function render(){
+ document.getElementById("nav").innerHTML=TABS.map(function(t){return '<button role="tab" class="'+(tab===t[0]?"on":"")+'" onclick="go(\''+t[0]+'\')">'+t[1]+'</button>'}).join("");
+ var v=document.getElementById("view");
+ if(tab==="setup")v.innerHTML=setupV();else if(tab==="plan")v.innerHTML=planV();else if(tab==="quiz")v.innerHTML=quizV();else v.innerHTML=dashV();
+}
+function setupV(){
+ var today=new Date().toISOString().slice(0,10);
+ return '<div class="card"><h2>When is your exam?</h2><input type="date" id="ex" min="'+today+'" value="'+S.exam+'" onchange="S.exam=this.value;save()"></div>'+
+ '<div class="card"><h2>Which areas feel weak?</h2><p class="mute">Pick any. Weak areas get double study time.</p><div class="chips">'+
+ Object.keys(DOMS).map(function(k){return '<button class="chip '+(S.weak.indexOf(k)>-1?"on":"")+'" onclick="tw(\''+k+'\')">'+DOMS[k]+'</button>'}).join("")+'</div></div>'+
+ '<button class="btn" onclick="mk()">Build my plan</button>';
+}
+function tw(k){var i=S.weak.indexOf(k);if(i>-1)S.weak.splice(i,1);else S.weak.push(k);save();render()}
+function mk(){var e=document.getElementById("ex");if(e)S.exam=e.value;if(!S.exam||daysLeft()<1){alert("Pick an exam date in the future first.");return}save();go("plan")}
+function planV(){
+ var d=daysLeft();if(!S.exam||d<1)return '<div class="card"><h2>No plan yet</h2><p>Set your exam date first, then we will build your weekly plan.</p><button class="btn" onclick="go(\'setup\')">Go to setup</button></div>';
+ var weeks=Math.min(Math.max(Math.ceil(d/7),1),8),keys=Object.keys(DOMS),seq=[];
+ keys.forEach(function(k){var n=1,p=pct(k);if(S.weak.indexOf(k)>-1)n++;if(p!==null&&p<60)n++;for(var m=0;m<n;m++)seq.push(k)});
+ var per=Math.max(Math.ceil(seq.length/Math.max(weeks-1,1)),1),h='<div class="card"><h2>'+d+' day'+(d>1?'s':'')+' to go</h2><p class="mute">'+weeks+' week'+(weeks>1?'s':'')+' of revision. Domains you marked weak, or score under 60% on, get extra sessions. Take a practice check after each session and this plan updates itself.</p></div>',idx=0;
+ for(var w=1;w<=weeks;w++){
+  var last=w===weeks,items=[];
+  if(last||weeks===1){items.push(["Mixed review quiz on all domains",null]);}
+  else{for(var j=0;j<per&&idx<seq.length;j++,idx++)items.push([DOMS[seq[idx]],seq[idx]])}
+  if(!items.length)items.push(["Mixed review quiz on all domains",null]);
+  h+='<div class="week"><h2>Week '+w+'</h2>'+items.map(function(it){var wk=it[1]&&S.weak.indexOf(it[1])>-1;return '<div class="sess"><span style="flex:1">Study: '+it[0]+'</span>'+(wk?'<span class="tag weak">weak area</span>':'')+(it[1]&&pct(it[1])!==null&&pct(it[1])<60?'<span class="tag weak">low score '+pct(it[1])+'%</span>':'')+'<button class="chip" onclick="startQ(\''+(it[1]||"mix")+'\')">Practice check</button></div>'}).join("")+'</div>';
+ }
+ return h;
+}
+function startQ(k){quiz={k:k,list:Q.filter(function(q){return k==="mix"||q.d===k}).sort(function(){return Math.random()-.5}),i:0,pick:null,right:0};tab="quiz";render()}
+function quizV(){
+ if(!quiz)return '<div class="card"><h2>Choose a quiz</h2><div class="chips">'+Object.keys(DOMS).map(function(k){return '<button class="chip" onclick="startQ(\''+k+'\')">'+DOMS[k]+'</button>'}).join("")+'<button class="chip" onclick="startQ(\'mix\')">Mixed (all 15)</button></div></div>';
+ if(quiz.i>=quiz.list.length){var r=quiz.right,n=quiz.list.length;return '<div class="card"><h2>Quiz complete</h2><p class="big">'+r+'/'+n+'</p><p>'+(r/n>=.8?"Strong result. Keep this up.":r/n>=.6?"Getting there. Review the explanations you missed.":"This area needs more study. Revisit it in your plan.")+'</p><button class="btn" onclick="quiz=null;go(\'plan\')">See my updated plan</button> <button class="btn ghost" onclick="quiz=null;go(\'dash\')">See progress</button> <button class="btn ghost" onclick="quiz=null;render()">Another quiz</button></div>'}
+ var q=quiz.list[quiz.i],h='<div class="card"><p class="mute">Question '+(quiz.i+1)+' of '+quiz.list.length+' · '+DOMS[q.d]+'</p><h2>'+q.q+'</h2>';
+ q.o.forEach(function(o,i){var c="opt";if(quiz.pick!==null){if(i===q.a)c+=" right";else if(i===quiz.pick)c+=" wrong"}h+='<button class="'+c+'" '+(quiz.pick!==null?'disabled':'onclick="ans('+i+')"')+'>'+o+'</button>'});
+ if(quiz.pick!==null){h+='<div class="fb"><b>'+(quiz.pick===q.a?"Correct. ":"Not quite. ")+'</b>'+q.e+'</div><button class="btn" onclick="quiz.i++;quiz.pick=null;render()">'+(quiz.i+1>=quiz.list.length?"Finish":"Next question")+'</button>'}
+ return h+'</div>';
+}
+function ans(i){var q=quiz.list[quiz.i];quiz.pick=i;var s=S.stats[q.d];s.t++;if(i===q.a){s.c++;quiz.right++}save();render()}
+function dashV(){
+ var keys=Object.keys(DOMS),tot=0,cor=0,tried=0;
+ keys.forEach(function(k){tot+=S.stats[k].t;cor+=S.stats[k].c;if(S.stats[k].t)tried++});
+ if(!tot)return '<div class="card"><h2>No scores yet</h2><p>Take a quiz and your readiness score appears here.</p><button class="btn" onclick="go(\'quiz\')">Start a quiz</button></div>';
+ var sc=0;keys.forEach(function(k){sc+=(pct(k)||0)});var ready=Math.round(sc/3),
+ lab=ready>=80&&tried===3?"Ready to book your exam":ready>=60?"Close. Keep practising":"Early stage. Stay with your plan";
+ var h='<div class="card"><div class="row"><div><p class="mute">Overall readiness</p><span class="big">'+ready+'%</span></div><div style="max-width:320px"><p><b>'+lab+'</b></p><p class="mute">Based on your accuracy across all three domains'+(tried<3?'. Untried domains count as 0%.':'.')+'</p></div></div></div><div class="card"><h2>By domain</h2>';
+ var weakest=null,low=101;
+ keys.forEach(function(k){var p=pct(k);if(p!==null&&p<low){low=p;weakest=k}h+='<div><div class="row"><span>'+DOMS[k]+'</span><b>'+(p===null?"Not tried":p+"%")+'</b></div><div class="bar"><i class="'+(p!==null&&p<60?"low":"")+'" style="width:'+(p||0)+'%"></i></div><p class="mute" style="font-size:.85rem">'+S.stats[k].c+' of '+S.stats[k].t+' answers correct</p></div>'});
+ h+='</div>';var nt=keys.filter(function(k){return !S.stats[k].t})[0];
+ if(nt)h+='<div class="card"><b>Next step:</b> try <b>'+DOMS[nt]+'</b>, you have no scores there yet. <br><br><button class="btn" onclick="startQ(\''+nt+'\')">Quiz me</button></div>';
+ else if(weakest)h+='<div class="card"><b>Weakest area:</b> '+DOMS[weakest]+' ('+low+'%). <br><br><button class="btn" onclick="startQ(\''+weakest+'\')">Practise it now</button></div>';
+ return h+'<button class="btn ghost" onclick="if(confirm(\'Reset all scores?\')){S.stats={cloud:{c:0,t:0},arch:{c:0,t:0},gov:{c:0,t:0}};save();render()}">Reset scores</button>';
+}
+render();
+</script>
+</body>
+</html>
