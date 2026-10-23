@@ -13,15 +13,15 @@ Learners preparing for AZ-900 often have limited time and no clear idea where to
 
 ## What it does
 
-1. **Setup:** enter your exam date and mark the domains that feel weak.
-2. **Your plan:** get a week-by-week revision schedule. Domains you marked weak get extra sessions.
+1. **Setup:** enter your exam date, the hours you can study each week and the domains that feel weak.
+2. **Your plan:** get a week-by-week revision schedule. Domains you marked weak get extra sessions, and each session shows how long to spend on it. The app warns you when your hours are tight.
 3. **Practice check:** answer short original questions with instant feedback and a plain-language explanation for every answer.
 4. **Adaptive plan:** any domain where your practice score falls below 60% automatically gets extra sessions, shown with a "low score" tag, so the plan changes as you improve.
 5. **Progress:** see accuracy per domain, an overall readiness score and a suggested next step.
 
 ## Coverage
 
-Original practice questions across the three AZ-900 exam domains:
+Each explanation also includes a short real-life example from everyday Kenyan life. Original practice questions across the three AZ-900 exam domains:
 
 - Cloud concepts
 - Azure architecture and services
