@@ -21,8 +21,8 @@ nav button{background:none;border:0;border-bottom:3px solid transparent;padding:
 nav button.on{color:var(--a);border-color:var(--a)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:14px}
 label{font-weight:600;display:block;margin-bottom:6px}
-input[type=date]{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
+input[type=date],input[type=number]{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+input[type=number]{width:90px}.chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:9px 12px;font:600 .92rem Figtree,sans-serif;cursor:pointer}
 .chip.on{border-color:var(--a);background:var(--a2);color:var(--a)}
 .btn{background:var(--a);color:#fff;border:0;border-radius:8px;padding:11px 18px;font:600 1rem Figtree,sans-serif;cursor:pointer}
@@ -46,7 +46,7 @@ footer{font-size:.82rem;color:var(--mute);margin-top:28px}
 <div class="wrap">
 <span class="badge">Unofficial study tool. Not affiliated with or endorsed by Microsoft.</span>
 <h1>Cloud Pace</h1>
-<p class="mute">Short on time before your exam? Enter your exam date and weak spots. Cloud Pace builds a revision plan for AZ-900 and adapts it as your practice scores come in.</p>
+<p class="mute">Short on time before your exam? Enter your exam date, weekly study hours and weak spots. Cloud Pace builds a revision plan for AZ-900 and adapts it as your practice scores come in.</p>
 <nav id="nav" role="tablist"></nav>
 <main id="view"></main>
 <footer>Practice questions are original and written for learning. They are not real exam questions. Always check Microsoft Learn for the official skills outline.</footer>
@@ -70,7 +70,8 @@ var Q=[
 {d:"gov",q:"What does role-based access control (RBAC) do?",o:["Controls which actions a user can perform on which resources","Encrypts all network traffic","Chooses the cheapest region","Monitors application speed"],a:0,e:"RBAC assigns roles at a scope so people get only the access they need (least privilege)."},
 {d:"gov",q:"Which service collects and analyzes metrics and logs to show how your resources are performing?",o:["Azure Monitor","Azure Blueprints","Pricing calculator","Azure Lighthouse"],a:0,e:"Azure Monitor gathers telemetry from resources and applications so you can view, alert on and respond to it."}
 ];
-var S={exam:"",weak:[],stats:{cloud:{c:0,t:0},arch:{c:0,t:0},gov:{c:0,t:0}}};
+var EX=["A matatu owner who rents a vehicle by the day pays only on days it works. Buying the matatu outright is the big upfront CapEx.","At rush hour a Nairobi stage adds more matatus on the same route instead of buying one giant bus.","Like renting a fully equipped shared kitchen for your catering business: you cook, while the owner looks after the building, gas and equipment.","If you rent an empty shop, the landlord secures the building, but you are responsible for what you stock and fix inside it.","A busy M-Pesa shop brings in extra staff on payday and sends them home when it is quiet.","Like one box for everything for a single wedding (tents, chairs, catering). When the event ends, you clear the whole box together.","Like a bank with branches in different parts of Nairobi: if one branch loses power, the others keep serving customers.","Like a big warehouse where you can store any kind of goods, such as photos and videos, without sorting them into neat tables first.","Like a boda boda rider you call only when there is a delivery: you pay for the trip, not for a rider waiting all day.","Like the private compound of an estate: residents move freely inside, and the gate controls who gets in.","Like a county rule that every market stall must stand in an approved zone: the rule is checked and enforced for everyone.","Like a second lock on the shop safe: even with the shop keys, someone must deliberately unlock it before emptying it.","Like asking a caterer for a quotation before the wedding, so you see the estimated bill before you spend anything.","At a school the bursar handles fees, a teacher enters marks and a student only views results. Each role gets just the access it needs.","Like CCTV and a dashboard in a supermarket: it watches what is happening and alerts you when something looks wrong."];Q.forEach(function(q,i){q.x=EX[i]});
+var S={exam:"",hours:5,weak:[],stats:{cloud:{c:0,t:0},arch:{c:0,t:0},gov:{c:0,t:0}}};
 try{var raw=localStorage.getItem("cloudpace");if(raw)S=JSON.parse(raw)}catch(e){}
 function save(){try{localStorage.setItem("cloudpace",JSON.stringify(S))}catch(e){}}
 var tab="setup",quiz=null;
@@ -86,24 +87,26 @@ function render(){
 function setupV(){
  var today=new Date().toISOString().slice(0,10);
  return '<div class="card"><h2>When is your exam?</h2><input type="date" id="ex" min="'+today+'" value="'+S.exam+'" onchange="S.exam=this.value;save()"></div>'+
+ '<div class="card"><h2>How many hours can you study each week?</h2><input type="number" id="hr" min="1" max="40" value="'+(S.hours||5)+'" onchange="S.hours=Math.min(40,Math.max(1,+this.value||5));save()"> <span class="mute">hours per week</span></div>'+
  '<div class="card"><h2>Which areas feel weak?</h2><p class="mute">Pick any. Weak areas get double study time.</p><div class="chips">'+
  Object.keys(DOMS).map(function(k){return '<button class="chip '+(S.weak.indexOf(k)>-1?"on":"")+'" onclick="tw(\''+k+'\')">'+DOMS[k]+'</button>'}).join("")+'</div></div>'+
  '<button class="btn" onclick="mk()">Build my plan</button>';
 }
 function tw(k){var i=S.weak.indexOf(k);if(i>-1)S.weak.splice(i,1);else S.weak.push(k);save();render()}
-function mk(){var e=document.getElementById("ex");if(e)S.exam=e.value;if(!S.exam||daysLeft()<1){alert("Pick an exam date in the future first.");return}save();go("plan")}
+function mk(){var e=document.getElementById("ex");if(e)S.exam=e.value;var hi=document.getElementById("hr");if(hi)S.hours=Math.min(40,Math.max(1,+hi.value||5));if(!S.exam||daysLeft()<1){alert("Pick an exam date in the future first.");return}save();go("plan")}
 function planV(){
  var d=daysLeft();if(!S.exam||d<1)return '<div class="card"><h2>No plan yet</h2><p>Set your exam date first, then we will build your weekly plan.</p><button class="btn" onclick="go(\'setup\')">Go to setup</button></div>';
- var weeks=Math.min(Math.max(Math.ceil(d/7),1),8),keys=Object.keys(DOMS),seq=[];
+ var hr=S.hours||5,tight=false,weeks=Math.min(Math.max(Math.ceil(d/7),1),8),keys=Object.keys(DOMS),seq=[];
  keys.forEach(function(k){var n=1,p=pct(k);if(S.weak.indexOf(k)>-1)n++;if(p!==null&&p<60)n++;for(var m=0;m<n;m++)seq.push(k)});
- var per=Math.max(Math.ceil(seq.length/Math.max(weeks-1,1)),1),h='<div class="card"><h2>'+d+' day'+(d>1?'s':'')+' to go</h2><p class="mute">'+weeks+' week'+(weeks>1?'s':'')+' of revision. Domains you marked weak, or score under 60% on, get extra sessions. Take a practice check after each session and this plan updates itself.</p></div>',idx=0;
+ var per=Math.max(Math.ceil(seq.length/Math.max(weeks-1,1)),1),h='<div class="card"><h2>'+d+' day'+(d>1?'s':'')+' to go</h2><p class="mute">'+weeks+' week'+(weeks>1?'s':'')+' of revision. Domains you marked weak, or score under 60% on, get extra sessions. Take a practice check after each session and this plan updates itself.</p><p><b>'+hr+' study hours per week</b>, about '+Math.round(hr*weeks)+' hours in total.</p></div>',idx=0;
  for(var w=1;w<=weeks;w++){
   var last=w===weeks,items=[];
   if(last||weeks===1){items.push(["Mixed review quiz on all domains",null]);}
   else{for(var j=0;j<per&&idx<seq.length;j++,idx++)items.push([DOMS[seq[idx]],seq[idx]])}
   if(!items.length)items.push(["Mixed review quiz on all domains",null]);
-  h+='<div class="week"><h2>Week '+w+'</h2>'+items.map(function(it){var wk=it[1]&&S.weak.indexOf(it[1])>-1;return '<div class="sess"><span style="flex:1">Study: '+it[0]+'</span>'+(wk?'<span class="tag weak">weak area</span>':'')+(it[1]&&pct(it[1])!==null&&pct(it[1])<60?'<span class="tag weak">low score '+pct(it[1])+'%</span>':'')+'<button class="chip" onclick="startQ(\''+(it[1]||"mix")+'\')">Practice check</button></div>'}).join("")+'</div>';
+  var he=(Math.round(hr/items.length*2)/2)||0.5;if(he<1)tight=true;h+='<div class="week"><h2>Week '+w+'</h2>'+items.map(function(it){var wk=it[1]&&S.weak.indexOf(it[1])>-1;return '<div class="sess"><span style="flex:1">Study: '+it[0]+'</span><span class="tag">'+he+' h</span>'+(wk?'<span class="tag weak">weak area</span>':'')+(it[1]&&pct(it[1])!==null&&pct(it[1])<60?'<span class="tag weak">low score '+pct(it[1])+'%</span>':'')+'<button class="chip" onclick="startQ(\''+(it[1]||"mix")+'\')">Practice check</button></div>'}).join("")+'</div>';
  }
+ if(tight)h=h.replace('</div>','</div><div class="card" style="background:var(--warnb);color:var(--warn)"><b>Tight on time.</b> Some sessions are under 1 hour. Do the weak-area sessions first, or add study hours if you can.</div>');
  return h;
 }
 function startQ(k){quiz={k:k,list:Q.filter(function(q){return k==="mix"||q.d===k}).sort(function(){return Math.random()-.5}),i:0,pick:null,right:0};tab="quiz";render()}
@@ -112,7 +115,7 @@ function quizV(){
  if(quiz.i>=quiz.list.length){var r=quiz.right,n=quiz.list.length;return '<div class="card"><h2>Quiz complete</h2><p class="big">'+r+'/'+n+'</p><p>'+(r/n>=.8?"Strong result. Keep this up.":r/n>=.6?"Getting there. Review the explanations you missed.":"This area needs more study. Revisit it in your plan.")+'</p><button class="btn" onclick="quiz=null;go(\'plan\')">See my updated plan</button> <button class="btn ghost" onclick="quiz=null;go(\'dash\')">See progress</button> <button class="btn ghost" onclick="quiz=null;render()">Another quiz</button></div>'}
  var q=quiz.list[quiz.i],h='<div class="card"><p class="mute">Question '+(quiz.i+1)+' of '+quiz.list.length+' · '+DOMS[q.d]+'</p><h2>'+q.q+'</h2>';
  q.o.forEach(function(o,i){var c="opt";if(quiz.pick!==null){if(i===q.a)c+=" right";else if(i===quiz.pick)c+=" wrong"}h+='<button class="'+c+'" '+(quiz.pick!==null?'disabled':'onclick="ans('+i+')"')+'>'+o+'</button>'});
- if(quiz.pick!==null){h+='<div class="fb"><b>'+(quiz.pick===q.a?"Correct. ":"Not quite. ")+'</b>'+q.e+'</div><button class="btn" onclick="quiz.i++;quiz.pick=null;render()">'+(quiz.i+1>=quiz.list.length?"Finish":"Next question")+'</button>'}
+ if(quiz.pick!==null){h+='<div class="fb"><b>'+(quiz.pick===q.a?"Correct. ":"Not quite. ")+'</b>'+q.e+'<br><br><b>Think of it like this:</b> '+q.x+'</div><button class="btn" onclick="quiz.i++;quiz.pick=null;render()">'+(quiz.i+1>=quiz.list.length?"Finish":"Next question")+'</button>'}
  return h+'</div>';
 }
 function ans(i){var q=quiz.list[quiz.i];quiz.pick=i;var s=S.stats[q.d];s.t++;if(i===q.a){s.c++;quiz.right++}save();render()}
